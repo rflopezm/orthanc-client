@@ -9,6 +9,7 @@ const instances = require('./lib/instances'),
   queries = require('./lib/queries'),
   modalities = require('./lib/modalities'),
   statistics = require('./lib/statistics');
+
 /**
  * Creates a new Client
  * @class
@@ -18,8 +19,7 @@ const instances = require('./lib/instances'),
  * @param {String} [param.auth.user] Valid Orthanc Server username
  * @param {String} [param.auth.pass] Valid Orthanc Server password
  */
-class Client  {
-
+class Client {
   constructor(param) {
 
     /**
@@ -38,47 +38,55 @@ class Client  {
      * @property {String} password Password which will be used by the client to authenticate against Orthanc server
      */
     this.auth = param.auth;
-    if ('undefined' !== typeof this.auth && ('string' !== typeof this.auth.user || 'string' !== typeof this.auth.pass)) {
+    if (
+      'undefined' !== typeof this.auth &&
+      ('string' !== typeof this.auth.user || 'string' !== typeof this.auth.pass)
+    ) {
       if ('string' === typeof this.auth.username || 'string' === typeof this.auth.password) {
         this.auth = {
           user: this.auth.username,
           pass: this.auth.password
-        }
-      }
-      else {
+        };
+      } else {
         throw new Error('Invalid credentials');
       }
     }
 
     const self = this;
 
-
     /**
      * Operations over instances
      */
     this.instances = {
+
       /**
        * Get all instances
        * @returns {Promise} The expected response is an array containing Strings
        */
-      getAll: function () {
-        return instances.getAll(self)
+      getAll: function() {
+        return instances.getAll(self);
       },
+
       /**
        * Get the instance with the given id
        * @param {String} id Id of the targeted instance
        * @returns {Promise} The expected result is a JSON object
        */
-      get: function (id) {
-        return instances.get(self, id)
+      get: function(id) {
+        return instances.get(self, id);
       },
+
+      delete: function(id) {
+        return instances.delete(self, id);
+      },
+
       /**
        * Add the new DICOM file given as a Buffer
        * @param {Buffer} buffer The DICOM file which will be uploaded
        * @returns {Promise} The expected result is a JSON object
        */
-      add: function (buffer) {
-        return instances.add(self, buffer)
+      add: function(buffer) {
+        return instances.add(self, buffer);
       },
       //anonymize: function() {//TODO},
       /**
@@ -89,120 +97,140 @@ class Client  {
        * @param {Number} [index] Index number of the targeted sequence value
        * @returns {Promise} The expected value is either an array containing Strings, either a String (if group and element are both provided)
        */
-      getContent: function (id, group, element, index) {
-        return instances.getContent(self, id, group, element, index)
+      getContent: function(id, group, element, index) {
+        return instances.getContent(self, id, group, element, index);
       },
+
       /**
        * Write the DICOM file in the filesystem where Orthanc is running
        * @param {String} id Id of the targeted instance
        * @returns {Promise} The expected response is an empty JSON object
        */
-      export: function (id) {
-        return instances.export(self, id)
+      export: function(id) {
+        return instances.export(self, id);
       },
+
       /**
        * Get the .dcm file of the instance with the given id
        * @param {String} id Id of the targeted instance
        * @returns {Promise} The expected response is a Buffer
        */
-      getFile: function (id) {
-        return instances.getFile(self, id)
+      getFile: function(id) {
+        return instances.getFile(self, id);
       },
+
       /**
        * Get an array containing all the frames index of the instance with the given id
        * @param {String} id Id of the targeted instance
        * @returns {Promise} The expected response is an array containing Numbers
        */
-      getAllFrames: function (id) {
-        return instances.getAllFrames(self, id)
+      getAllFrames: function(id) {
+        return instances.getAllFrames(self, id);
       },
+
+      putMetadata: function(id, metadata) {
+        return instances.putMetadata(self, id, metadata);
+      },
+
       /**
        * Get the frameNumber'th frame of the instance with the given id
        * @param {String} id Id of the targeted instance
        * @param {Number} frameNumber Index of the targeted frame
        * @param {String} [frameFormat=preview] Wanted format for the targeted frame. Must be image-int16, image-uint16, image-uint8, matlab or preview
        */
-      getFrame: function (id, frameNumber, frameFormat) {
-        return instances.getFrame(self, id, frameNumber, frameFormat)
+      getFrame: function(id, frameNumber, frameFormat) {
+        return instances.getFrame(self, id, frameNumber, frameFormat);
       },
+
       /**
        * Get the image of the instance with the given id
        * @param {String} id Id of the targeted instance
        * @param {String} [imageFormat=preview] Wanted format for the targeted frame. Must be image-int16, image-uint16, image-uint8, matlab or preview
        */
-      getImage: function (id, imageFormat) {
-        return instances.getImage(self, id, imageFormat)
+      getImage: function(id, imageFormat) {
+        return instances.getImage(self, id, imageFormat);
       },
-      //modify: function(id) {//TODO},
+      modify: function(id, manipulation) {
+        return instances.modify(self, id, manipulation);
+      },
+
       /**
        * @todo Improve the documentation of this function
        * @param {String} id Id of the targeted instance
        * @param {Boolean} [simplify=false] Specify whether or not the output should be simplified
        * @returns {Promise} The expected response is a JSON object
        */
-      getModule: function (id, simplify) {
-        return instances.getModule(self, id, simplify)
+      getModule: function(id, simplify) {
+        return instances.getModule(self, id, simplify);
       },
+
       /**
        * Get the parent Patient of the instance with the given id
        * @param {String} id Id of the targeted instance
        * @returns {Promise} The expected result is a JSON objects
        */
-      getPatient: function (id) {
-        return instances.getPatient(self, id)
+      getPatient: function(id) {
+        return instances.getPatient(self, id);
       },
+
       /**
        * Get the parent Series of the instance with the given id
        * @param {String} id Id of the targeted instance
        * @returns {Promise} The expected result is a JSON objects
        */
-      getSeries: function (id) {
-        return instances.getSeries(self, id)
+      getSeries: function(id) {
+        return instances.getSeries(self, id);
       },
+
       /**
        * Get the tags of the instance with the given id
        * @param {String} id Id of the targeted instance
        * @param {Boolean} [simplify=false] Specify whether or not the output should be simplified
        * @returns {Promise} The expected response is a JSON object
        */
-      getTags: function (id, simplify) {
-        return instances.getTags(self, id, simplify)
+      getTags: function(id, simplify) {
+        return instances.getTags(self, id, simplify);
       },
+
       /**
        * Get some general informations about the instance with the given id
        * @param {String} id Id of the targeted instance
        * @returns {Promise} The expected response is a JSON object
        */
-      getStatistics: function (id) {
-        return instances.getStatistics(self, id)
+      getStatistics: function(id) {
+        return instances.getStatistics(self, id);
       },
+
       /**
        * Get the parent Study of the instance with the given id
        * @param {String} id Id of the targeted instance
        * @returns {Promise} The expected result is a JSON objects
        */
-      getStudy: function (id) {
-        return instances.getStudy(self, id)
+      getStudy: function(id) {
+        return instances.getStudy(self, id);
       }
     };
+
     /**
      * Operations over series
      */
     this.series = {
+
       /**
        * Get all series
        * @returns {Promise} The expected result is an array containing Strings
        */
-      getAll: function () {
-        return series.getAll(self)
+      getAll: function() {
+        return series.getAll(self);
       },
+
       /**
        * Get the series with the given id
        * @param {String} id Id of the targeted series
        * @returns {Promise} The expected result is a JSON object
        */
-      get: function (id) {
-        return series.get(self, id)
+      get: function(id) {
+        return series.get(self, id);
       },
       //anonymize: function() {//TODO},
       /**
@@ -210,24 +238,26 @@ class Client  {
        * @param {String} id Id of the targeted series
        * @returns {Promise} The expected response is a Buffer
        */
-      getArchive: function (id) {
-        return series.getArchive(self, id)
+      getArchive: function(id) {
+        return series.getArchive(self, id);
       },
+
       /**
        * Get all the instances of the series with the given id
        * @param {String} id Id of the targeted series
        * @returns {Promise} The expected response is an array of JSON objects
        */
-      getInstances: function (id) {
-        return series.getInstances(self, id)
+      getInstances: function(id) {
+        return series.getInstances(self, id);
       },
+
       /**
        * Get a zipped archive containing the series with the given id for media storage with DICOMDIR
        * @param {String} id Id of the targeted series
        * @returns {Promise} The expected response is a Buffer
        */
-      getMedia: function (id) {
-        return series.getMedia(self, id)
+      getMedia: function(id) {
+        return series.getMedia(self, id);
       },
       //modify: function() {//TODO},
       /**
@@ -236,61 +266,68 @@ class Client  {
        * @param {Boolean} [simplify=false] Specify whether or not the output should be simplified
        * @returns {Promise} The expected response is a JSON object
        */
-      getModule: function (id, simplify) {
-        return series.getModule(self, id, simplify)
+      getModule: function(id, simplify) {
+        return series.getModule(self, id, simplify);
       },
+
       /**
        * Get the parent Patient of the series with the given id
        * @param {String} id Id of the targeted series
        * @returns {Promise} The expected result is an array of JSON objects
        */
-      getPatient: function (id) {
-        return series.getPatient(self, id)
+      getPatient: function(id) {
+        return series.getPatient(self, id);
       },
+
       /**
        * Get the shared tags of the series with the given id
        * @param {String} id Id of the targeted series
        * @param {Boolean} [simplify=false] Specify whether or not the output should be simplified
        * @returns {Promise} The expected response is a JSON object
        */
-      getSharedTags: function (id, simplify) {
-        return series.getSharedTags(self, id, simplify)
+      getSharedTags: function(id, simplify) {
+        return series.getSharedTags(self, id, simplify);
       },
+
       /**
        * Get some general informations about the series with the given id
        * @param {String} id Id of the targeted series
        * @returns {Promise} The expected response is a JSON object
        */
-      getStatistics: function (id) {
-        return series.getStatistics(self, id)
+      getStatistics: function(id) {
+        return series.getStatistics(self, id);
       },
+
       /**
        * Get the parent Study of the series with the given id
        * @param {String} id Id of the targeted series
        * @returns {Promise} The expected result is an array of JSON objects
        */
-      getStudy: function (id) {
-        return series.getStudy(self, id)
+      getStudy: function(id) {
+        return series.getStudy(self, id);
       }
     };
+
     /**
      * Operations over studies
      */
     this.studies = {
+
       /**
        * Get all studies
        * @returns {Promise} The expected result is an array containing Strings
        */
-      getAll: function () {
-        return studies.getAll(self)
+      getAll: function() {
+        return studies.getAll(self);
       },
+
       /**
        * Get the study with the given id
        * @param {String} id Id of the targeted study
        * @returns {Promise} The expected result is a JSON object
        */
-      get: function (id) {
-        return studies.get(self, id)
+      get: function(id) {
+        return studies.get(self, id);
       },
       //anonymize: function() {//TODO},
       /**
@@ -298,24 +335,26 @@ class Client  {
        * @param {String} id Id of the targeted study
        * @returns {Promise} The expected response is a Buffer
        */
-      getArchive: function (id) {
-        return studies.getArchive(self, id)
+      getArchive: function(id) {
+        return studies.getArchive(self, id);
       },
+
       /**
        * Get all the instances of the study with the given id
        * @param {String} id Id of the targeted study
        * @returns {Promise} The expected response is an array of JSON objects
        */
-      getInstances: function (id) {
-        return studies.getInstances(self, id)
+      getInstances: function(id) {
+        return studies.getInstances(self, id);
       },
+
       /**
        * Get a zipped archive containing the study with the given id for media storage with DICOMDIR
        * @param {String} id Id of the targeted study
        * @returns {Promise} The expected response is a Buffer
        */
-      getMedia: function (id) {
-        return studies.getMedia(self, id)
+      getMedia: function(id) {
+        return studies.getMedia(self, id);
       },
       //modify: function() {//TODO},
       /**
@@ -324,70 +363,85 @@ class Client  {
        * @param {Boolean} [simplify=false] Specify whether or not the output should be simplified
        * @returns {Promise} The expected response is a JSON object
        */
-      getModule: function (id, simplify) {
-        return studies.getModule(self, id, simplify)
+      getModule: function(id, simplify) {
+        return studies.getModule(self, id, simplify);
       },
+
       /**
        * @todo Improve the documentation of this function
        * @param {String} id Id of the targeted study
        * @param {Boolean} [simplify=false] Specify whether or not the output should be simplified
        * @returns {Promise} The expected response is a JSON object
        */
-      getModulePatient: function (id, simplify) {
-        return studies.getModulePatient(self, id, simplify)
+      getModulePatient: function(id, simplify) {
+        return studies.getModulePatient(self, id, simplify);
       },
+
       /**
        * Get the parent Patient of the study with the given id
        * @param {String} id Id of the targeted study
        * @returns {Promise} The expected result is an array of JSON objects
        */
-      getPatient: function (id) {
-        return studies.getPatient(self, id)
+      getPatient: function(id) {
+        return studies.getPatient(self, id);
       },
+
       /**
        * Get all the series of the study with the given id
        * @param {String} id Id of the targeted study
        * @returns {Promise} The expected result is an array of JSON objects
        */
-      getSeries: function (id) {
-        return studies.getSeries(self, id)
+      getSeries: function(id) {
+        return studies.getSeries(self, id);
       },
+
       /**
        * Get the shared tags of the study with the given id
        * @param {String} id Id of the targeted study
        * @param {Boolean} [simplify=false] Specify whether or not the output should be simplified
        * @returns {Promise} The expected response is a JSON object
        */
-      getSharedTags: function (id, simplify) {
-        return studies.getSharedTags(self, id, simplify)
+      getSharedTags: function(id, simplify) {
+        return studies.getSharedTags(self, id, simplify);
       },
+
       /**
        * Get some general informations about the study with the given id
        * @param {String} id Id of the targeted study
        * @returns {Promise} The expected response is a JSON object
        */
-      getStatistics: function (id) {
-        return studies.getStatistics(self, id)
+      getStatistics: function(id) {
+        return studies.getStatistics(self, id);
       }
     };
+
     /**
      * Operations over patients
      */
     this.patients = {
+
       /**
        * Get all patients
        * @returns {Promise} The expected result is an array containing Strings
        */
-      getAll: function () {
-        return patients.getAll(self)
+      delete: function(id) {
+        return patients.delete(self, id);
       },
+      getAll: function() {
+        return patients.getAll(self);
+      },
+
       /**
        * Get the patient with the given id
        * @param {String} id Id of the targeted patient
        * @returns {Promise} The expected result is a JSON object
        */
-      get: function (id) {
-        return patients.get(self, id)
+      get: function(id) {
+        return patients.get(self, id);
+      },
+
+      reconstruct: function(id) {
+        return patients.reconstruct(self, id);
       },
       //anonymize: function() {//TODO},
       /**
@@ -395,146 +449,167 @@ class Client  {
        * @param {String} id Id of the targeted patient
        * @returns {Promise} The expected response is a Buffer
        */
-      getArchive: function (id) {
-        return patients.getArchive(self, id)
+      getArchive: function(id) {
+        return patients.getArchive(self, id);
       },
+
       /**
        * Get all the instances of the patient with the given id
        * @param {String} id Id of the targeted patient
        * @returns {Promise} The expected response is an array of JSON objects
        */
-      getInstances: function (id) {
-        return patients.getInstances(self, id)
+      getInstances: function(id) {
+        return patients.getInstances(self, id);
       },
+
       /**
        * Get a zipped archive containing the patient with the given id for media storage with DICOMDIR
        * @param {String} id Id of the targeted patient
        * @returns {Promise} The expected response is a Buffer
        */
-      getMedia: function (id) {
-        return patients.getMedia(self, id)
+      getMedia: function(id) {
+        return patients.getMedia(self, id);
       },
-      //modify: function() {//TODO},
+      modify: function(id, manipulation) {
+        return patients.modify(self, id, manipulation);
+      },
+
       /**
        * @todo Improve the documentation of this function
        * @param {String} id Id of the targeted patient
        * @param {Boolean} [simplify=false]
        * @returns {Promise} The expected response is a JSON object
        */
-      getModule: function (id, simplify) {
-        return patients.getModule(self, id, simplify)
+      getModule: function(id, simplify) {
+        return patients.getModule(self, id, simplify);
       },
+
       /**
        * Get the protection against recycling status
        * @param {String} id Id of the targeted patient
        * @returns {Promise} The expected result is a Boolean
        */
-      getProtected: function (id) {
-        return patients.getProtected(self, id)
+      getProtected: function(id) {
+        return patients.getProtected(self, id);
       },
+
       /**
        * Set the protection against recycling status
        * @param {String} id Id of the targeted patient
        * @param {Boolean} protect Specify whether or not the patient should be protected against recycling
        * @returns {Promise} The expected response is empty
        */
-      setProtected: function (id, protect) {
-        return patients.setProtected(self, id, protect)
+      setProtected: function(id, protect) {
+        return patients.setProtected(self, id, protect);
       },
+
       /**
        * Get all the series of the patient with the given id
        * @param {String} id Id of the targeted patient
        * @returns {Promise} The expected result is an array of JSON objects
        */
-      getSeries: function (id) {
-        return patients.getSeries(self, id)
+      getSeries: function(id) {
+        return patients.getSeries(self, id);
       },
+
       /**
        * Get the shared tags of the patient with the given id
        * @param {String} id Id of the targeted patient
        * @param {Boolean} [simplify=false]
        * @returns {Promise} The expected response is a JSON object
        */
-      getSharedTags: function (id, simplify) {
-        return patients.getSharedTags(self, id, simplify)
+      getSharedTags: function(id, simplify) {
+        return patients.getSharedTags(self, id, simplify);
       },
+
       /**
        * Get some general informations about the patient with the given id
        * @param {String} id Id of the targeted patient
        * @returns {Promise} The expected response is a JSON object
        */
-      getStatistics: function (id) {
-        return patients.getStatistics(self, id)
+      getStatistics: function(id) {
+        return patients.getStatistics(self, id);
       },
+
       /**
        * Get all the studies of the patient with the given id
        * @param {String} id Id of the targeted patient
        * @returns {Promise} The expected response is an array of JSON objects
        */
-      getStudies: function (id) {
-        return patients.getStudies(self, id)
+      getStudies: function(id) {
+        return patients.getStudies(self, id);
       }
     };
+
     /**
      * Tools operations
      */
     this.tools = {
+
       /**
        * Returns the current datetime in the ISO 8601 format
        * @returns {Promise} The expected response is a String
        */
-      now: function () {
-        return tools.now(self)
+      now: function() {
+        return tools.now(self);
       },
+
       /**
        * Hot restart of Orthanc, the configuration file will be read again
        * @returns {Promise} The expected response is an empty JSON object
        */
-      reset: function () {
-        return tools.reset(self)
+      reset: function() {
+        return tools.reset(self);
       },
+
       /**
        * Map DICOM UIDs to Orthanc identifiers
        * @param {UUID} uuid UUID which will be used to perform the lookup
        * @returns {Promise} The expected result is an array containing a JSON object
        */
-      lookup: function (uuid) {
-        return tools.lookup(self, uuid)
+      lookup: function(uuid) {
+        return tools.lookup(self, uuid);
       },
+
       /**
        * DICOM conformance statement of this version of Orthanc
        * @returns {Promise} The expected result is a String
        */
-      dicomConformance: function () {
-        return tools.dicomConformance(self)
+      dicomConformance: function() {
+        return tools.dicomConformance(self);
       },
+
       /**
        * Generates an UUID
        * @param {String} level argument among "patient", "study", "series" and "instance"
        * @returns {Promise} The expected result is a String
        */
-      generateUid: function (level) {
-        return tools.generateUid(self, level)
+      generateUid: function(level) {
+        return tools.generateUid(self, level);
       }
       //executeScript: function() {//TODO},
       //createDicom: function() {//TODO},
     };
+
     /**
      * System operations
      */
     this.system = {
+
       /**
        * Get some information about the Orthanc Server
        * @returns {Promise} The expected response is a JSON object
        */
-      system: function () {
-        return system.system(self)
+      system: function() {
+        return system.system(self);
       }
     };
+
     /**
      * Operations over changes logs
      */
     this.changes = {
+
       /**
        * Get changes logs
        * @param {Object} [params] last, "limit" and "since" arguments
@@ -543,21 +618,24 @@ class Client  {
        * @param {Number} [params.limit=100] Set the returned changes limit. Default and maximum values are the same : 100
        * @returns {Promise} The expected response is a JSON object
        */
-      getChanges: function (params) {
-        return changes.getChanges(self, params)
+      getChanges: function(params) {
+        return changes.getChanges(self, params);
       },
+
       /**
        * Delete changes logs
        * @returns {Promise} The expected response is empty
        */
-      deleteChanges: function () {
-        return changes.deleteChanges(self)
+      deleteChanges: function() {
+        return changes.deleteChanges(self);
       }
     };
+
     /**
      * Operations over exports logs
      */
     this.exports = {
+
       /**
        * Get exports logs. For medical traceability, Orthanc stores a log of all the resources that have been exported to remote modalities.
        * @param {Object} [params] last, "limit" and "since" arguments
@@ -566,52 +644,59 @@ class Client  {
        * @param {Number} [params.limit=100] Set the returned exports limit. Default and maximum values are the same : 100
        * @returns {Promise} The expected response is a JSON object
        */
-      getExports: function (params) {
-        return _exports.getExports(self, params)
+      getExports: function(params) {
+        return _exports.getExports(self, params);
       },
+
       /**
        * Delete exports logs
        * @returns {Promise} The expected response is empty
        */
-      deleteExports: function () {
-        return _exports.deleteExports(self)
+      deleteExports: function() {
+        return _exports.deleteExports(self);
       }
     };
+
     /**
      * Queries operations
      */
     this.queries = {
+
       /**
        * Get all queries
        * @returns {Promise} The expected response is an array containing Strings
        */
-      getAll: function(){
+      getAll: function() {
         return queries.getAll(self);
       },
+
       /**
        * Get the query with the given id
        * @param {String} id Id of the targeted instance
        * @returns {Promise} The expected result is a JSON object
        */
-      get: function (id) {
-        return queries.get(self, id)
+      get: function(id) {
+        return queries.get(self, id);
       },
+
       /**
        * Remove the query with the given id
        * @param {String} id Id of the targeted instance
        * @returns {Promise} The expected result is a JSON object
        */
-      remove: function (id) {
-        return queries.remove(self, id)
+      remove: function(id) {
+        return queries.remove(self, id);
       },
+
       /**
        * Get the answers's list of the query with the given id
        * @param {String} id Id of the targeted instance
        * @returns {Promise} The expected response is an array containing Number
        */
-      answers: function (id) {
-        return queries.answers(self, id)
+      answers: function(id) {
+        return queries.answers(self, id);
       },
+
       /**
        * Get content of the answers with the given index of the query with the given id
        * @private
@@ -620,9 +705,10 @@ class Client  {
        * @param {Boolean} [simplify=false] Specify whether or not the output should be simplified
        * @returns {Promise} The expected response is a JSON object
        */
-      answerContent: function (id, index, simplify) {
-        return queries.answerContent(self, id, index, simplify)
+      answerContent: function(id, index, simplify) {
+        return queries.answerContent(self, id, index, simplify);
       },
+
       /**
        * Send the answers's content of the query with the given id to modality with the given aet
        * @private
@@ -631,27 +717,30 @@ class Client  {
        * @param {String} aet AET of the targeted modality
        * @returns {Promise} The expected response is a JSON object
        */
-      answerRetrieve: function (id, index, aet) {
-        return queries.answerRetrieve(self, id, index, aet)
+      answerRetrieve: function(id, index, aet) {
+        return queries.answerRetrieve(self, id, index, aet);
       },
+
       /**
        * Get the level of the query with the given id
        * @private
        * @param {String} id Id of the targeted query
        * @returns {Promise} The expected response is a String
        */
-      getLevel: function (id) {
-        return queries.getLevel(self, id)
+      getLevel: function(id) {
+        return queries.getLevel(self, id);
       },
+
       /**
        * Get the modality of the query with the given id
        * @private
        * @param {String} id Id of the targeted query
        * @returns {Promise} The expected response is a String
        */
-      getModality: function (id) {
-        return queries.getModality(self, id)
+      getModality: function(id) {
+        return queries.getModality(self, id);
       },
+
       /**
        * Get the content of the query with the given id
        * @private
@@ -659,9 +748,10 @@ class Client  {
        * @param {Boolean} [simplify=false] Specify whether or not the output should be simplified
        * @returns {Promise} The expected response is a JSON Object
        */
-      getQuery: function (id, simplify) {
-        return queries.getQuery(self, id, simplify)
+      getQuery: function(id, simplify) {
+        return queries.getQuery(self, id, simplify);
       },
+
       /**
        * Send all results of the queries with the given id to the modality with the given aet
        * @private
@@ -669,14 +759,16 @@ class Client  {
        * @param {String} aet AET of the targeted modality
        * @returns {Promise} The expected response is a JSON object
        */
-      retrieve: function (id, aet) {
-        return queries.retrieve(self, id, aet)
-      },
+      retrieve: function(id, aet) {
+        return queries.retrieve(self, id, aet);
+      }
     };
+
     /**
      * Statistics operations
      */
     this.statistics = {
+
       /**
        * Get statistics of the orthanc instance
        * @private
@@ -686,6 +778,7 @@ class Client  {
         return statistics.getStatistics(self);
       }
     };
+
     /**
      * Plugin operations
      */
@@ -694,6 +787,7 @@ class Client  {
       //get: function(id) {//TODO},
       //getExplorerJs: function() {//TODO}
     };
+
     /**
      * Peer operations
      */
@@ -703,17 +797,20 @@ class Client  {
       //deletePeer: function() {//TODO},
       //addPeer: function() {//TODO}
     };
+
     /**
      * Modalities operations
      */
     this.modalities = {
+
       /**
        * Get all modalities
        * @returns {Promise} The expected response is an array containing Strings
        */
-      getAll: function () {
-        return modalities.getAll(self)
+      getAll: function() {
+        return modalities.getAll(self);
       },
+
       /**
        * Get the modality with the given id
        * @private
@@ -723,6 +820,7 @@ class Client  {
       get: function(id) {
         return modalities.get(self, id);
       },
+
       /**
        * Add the modality with the the given id
        * @private
@@ -731,8 +829,9 @@ class Client  {
        * @returns {Promise} The expected result is an empty JSON object
        */
       add: function(id, params) {
-        return modalities.add(self, id, params)
+        return modalities.add(self, id, params);
       },
+
       /**
        * Remove the modality with the given id
        * @private
@@ -742,6 +841,7 @@ class Client  {
       remove: function(id) {
         return modalities.remove(self, id);
       },
+
       /**
        * Send ECHO SCU request to the modality with the given id
        * @private
@@ -749,8 +849,9 @@ class Client  {
        * @returns {Promise} The expected response is an empty JSON Object
        */
       echo: function(id) {
-        return modalities.echo(self, id)
+        return modalities.echo(self, id);
       },
+
       /**
        * Send C-FIND SCU request to the modality with the given id
        * @private
@@ -759,10 +860,10 @@ class Client  {
        * @returns {Promise} The expected response is an empty JSON Object
        */
       query: function(id, query) {
-        return modalities.query(self, id, query)
-      },
+        return modalities.query(self, id, query);
+      }
       //store: function() {//TODO}
-    }
+    };
   }
 }
 
